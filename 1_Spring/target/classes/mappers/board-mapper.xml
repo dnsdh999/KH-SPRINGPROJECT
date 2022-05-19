@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="boardMapper">
+	<select id="getListCount" resultType="_int">
+		select count(*)
+		from board
+		where board_status='Y'
+	</select>
+	
+	<select id="selectList" resultMap="boardResultSet">
+		select BOARD_ID, BOARD_TITLE, BOARD_WRITER, NICKNAME, BOARD_CONTENT, ORIGINAL_FILENAME, RENAME_FILENAME,
+		BOARD_COUNT, BOARD_CREATE_DATE, BOARD_MODIFY_DATE, BOARD_STATUS
+		from board
+		join member on (BOARD_WRITER = ID)
+		where BOARD_STATUS = 'Y'
+		order by BOARD_ID desc 
+	</select>
+	<!-- 리절트 맵으로 해버리면 일치하지 않는 행의 경우는 잘 나타나지 않음. -->
+
+	
+	
+	<!-- 별칭 지정후 board.model.vo.Board에서 아래로 변경 -->
+	<resultMap type="Board" id="boardResultSet">
+	 	<id column="BOARD_ID" property="boardId"/> <!-- 기본키 -->
+	 	<result column="BOARD_TITLE" property="boardTitle"/> <!-- 일반컬럼 -->
+	 	<result column="BOARD_WRITER" property="boardWriter"/>
+	 	<result column="NICKNAME" property="nickName"/>
+	 	<result column="BOARD_CONTENT" property="boardContent"/>
+	 	<result column="ORIGINAL_FILENAME" property="originalFileName"/>
+	 	<result column="RENAME_FILENAME" property="renameFileName"/>
+	 	<result column="BOARD_COUNT" property="boardCount"/>
+	 	<result column="BOARD_CREATE_DATE" property="boardCreateDate"/>
+	 	<result column="BOARD_MODIFY_DATE" property="boardModifyDate"/>
+	 	<result column="BOARD_STATUS" property="boardStatus"/>
+	 	<!-- 일치하지 않는 경우만 써도 되지만 간혹 아예되지 않을때도 있으니 모두 명시하는 것을 추천 -->
+	 </resultMap>
+	 
+	 <select id="selectTopN" resultMap="boardResultSet">
+		select * from
+		(select BOARD_ID, BOARD_TITLE, BOARD_WRITER, NICKNAME, BOARD_CONTENT, ORIGINAL_FILENAME, RENAME_FILENAME,
+		BOARD_COUNT, BOARD_CREATE_DATE, BOARD_MODIFY_DATE, BOARD_STATUS
+		from board
+		join member on (BOARD_WRITER = ID)
+		where BOARD_STATUS = 'Y'
+		order by board_count DESC) where ROWNUM <![CDATA[ <= ]]> 5
+	</select>
+	 
+	 <select id="selectReplyList" resultMap="ReplyResultSet">
+	 	SELECT REPLY_ID, REPLY_CONTENT, REF_BOARD_ID, REPLY_WRITER, NICKNAME,
+	 	 REPLY_CREATE_DATE, REPLY_MODIFY_DATE, REPLY_STATUS 
+	 	 FROM REPLY JOIN MEMBER ON (REPLY_WRITER = ID)
+	 	 WHERE REF_BOARD_ID = #{boardId} AND REPLY_STATUS = 'Y'
+	 </select>
+	 
+	 <resultMap type="Reply" id="ReplyResultSet">
+	 	<id column="REPLY_ID" property="replyId"/> <!-- 기본키 -->
+	 	<result column="REPLY_CONTENT" property="replyContent"/> <!-- 일반컬럼 -->
+	 	<result column="REF_BOARD_ID" property="refBoardId"/>
+	 	<result column="REPLY_WRITER" property="replyWriter"/>
+	 	<result column="NICKNAME" property="nickName"/>
+	 	<result column="REPLY_CREATE_DATE" property="replyCreateDate"/>
+	 	<result column="REPLY_MODIFY_DATE" property="replyModifyDate"/>
+	 	<result column="REPLY_STATUS" property="replyStatus"/>
+	 	<!-- 일치하지 않는 경우만 써도 되지만 간혹 아예되지 않을때도 있으니 모두 명시하는 것을 추천 -->
+	 </resultMap>
+	 
+	 
+	 <insert id="insertBoard">
+	 	insert into board
+	 	values(SEQ_BID.NEXTVAL,#{boardTitle},#{boardWriter},#{boardContent},#{originalFileName},#{renameFileName},default,SYSDATE,SYSDATE,default)
+	 </insert>
+	 
+	 <select id="selectBoard" resultMap="boardResultSet">
+		select BOARD_ID, BOARD_TITLE, BOARD_WRITER, NICKNAME, BOARD_CONTENT, ORIGINAL_FILENAME, RENAME_FILENAME,
+		BOARD_COUNT, BOARD_CREATE_DATE, BOARD_MODIFY_DATE, BOARD_STATUS
+		from board
+		join member on (BOARD_WRITER = ID)
+		where BOARD_ID = #{bId}
+	</select>
+	
+	<select id="selectBoard2" resultType="com.kh.test.board.model.vo.Board">
+		select * from board where bid = #{bId}
+	</select>
+	
+	 <update id="viewCountUp">
+	 	UPDATE BOARD SET
+	 	board_count = board_count + 1 where BOARD_ID = #{bId}
+	 </update>
+	 
+	 <update id="updateBoard">
+	 	UPDATE BOARD SET
+	 	<if test="originalFileName != null">
+	 	ORIGINAL_FILENAME = #{originalFileName},
+	 	</if>
+	 	RENAME_FILENAME = #{renameFileName}, board_modify_date=sysdate,
+	 	BOARD_TITLE = #{boardTitle}, BOARD_CONTENT = #{boardContent} WHERE BOARD_ID = #{boardId}
+	 </update>
+	 
+	 <update id="deleteBoard">
+	 	update board set
+	 	board_status = 'N'
+	 	where board_id = #{bId}
+	 </update>
+	 
+	 <insert id="addReply">
+	 	INSERT INTO REPLY 
+	 	VALUES(SEQ_RID.NEXTVAL, #{replyContent}, #{refBoardId}, #{replyWriter}, sysdate,sysdate, default)
+	 </insert>
+</mapper>

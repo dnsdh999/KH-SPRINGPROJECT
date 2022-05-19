@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context-4.3.xsd">
+<!-- 빈즈를 스키마에서 포함하고 있기 때문에 servlet-context와 다르게 beans:beans라고 작성하지 않아도 된다. -->
+<!-- 사용할 수 있는 이유 밑에서 각각 다 정의를 했기때문임. xmlns, xsi, mvc 등등.. -->
+<!-- 태그를 사용하려면 xmlns:이름 식으로 작성을 한 뒤 아래에서는 이름: xxx 식으로 사용하면 된다. -->
+<!-- namespace에서 추가해서 사용도 가능함. -->
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<mvc:annotation-driven />
+	<!-- 어노테이션을 사용할 수 있게하는태그 -->
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/views/member/" />	<!-- 단어의 앞에 -->
+		<property name="suffix" value=".jsp" />				<!-- 단어의 뒤에 --> <!-- -->
+	</bean>
+	<!-- bean은 객체를 생성하는 태그, internalresourceviewresolver를 생성함.(어떤 뷰인가를 찾아주기 위해서) -->
+	<context:component-scan base-package="com.kh.spring" />
+	
+	
+</beans>

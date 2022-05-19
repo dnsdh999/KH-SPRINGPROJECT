@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Appenders -->
+	
+	<!-- 전달받은 로그를 어디에 출력할 지 결정 -->
+	<!-- 
+	ConsoleAppender		로그를 콘솔에 출력하기위한 어펜더
+	JDBCAppender		로그를 db에 출력하기 위한 어펜더
+	FileAppender		로그를 파일에 출력하기 위한 어펜더
+						지정파일에 로그가 계속해서 남으면 크기가 지나치게 커질 수 있으므로 지속적 로그 관리가 불가능하다.
+	RollingFileAppender	FileAppender 보완 개념, 일정 조건 후 기존 파일을 백업파일로 바꾸고 다시 처음부터 시작 - ex) DailyRollingFileAppender
+	
+	layout : 로그를 어떤 형식으로 출력할지 결정
+		DateLayout, HTMLLayout, SimpleLayout, XMLLayout, PatternLayout(디버깅에 가장 적합)
+		%p : debug, info, warn, error, fatal 등의 priority 출력
+		%m : 로그내용출력
+		%d : 로그 이벤트가 발생한 시간 출력 - 프로그램 실행속도를 느리게함
+			  포멧을 %d(HH:mm:ss, SSS) 같은 형태로 사용하며 SimpleDateFormat에 따른 포맷팅
+		%t : 로그 이벤트가 발생된 스레드 이름 출력
+		%% : %표시
+		%n : 개행 문자 출력
+		%c : package 출력
+		%c{n} : n만큼의 package를 가장 하단부터 역으로 출력, 카테고리가 a,b,c처럼 되어있다면 %c{2}는 b,c로 출력
+		%C : 클래스명 출력, 패키지와 마찬가지로 {n} 넣을 수 있고 하단부터 역으로 출력
+		%F : 로깅이 발생한 프로그램 파일명 출력
+		%l : 로깅이 발생한 caller의 정보 출력
+		%L : 로깅이 발새한 caller의 라인 수 출력
+		%M : 로깅이 발생한 method 이름 출력
+		%r : 애플리케이션 시작 이후부터 로깅이 발생한 시점의 시간출력
+	 -->
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- <param name="ConversionPattern" value="%-5p: %c - %m%n" /> -->
+			<param name="ConversionPattern" value="%c{2}{%L} / %F / %l /  / %M / %r - %m%n" />
+		</layout>
+	</appender>
+	
+	<appender name="myConsole" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p: %c{1}.%M{%L} - %m%n" />
+		</layout>
+	</appender>
+	
+	<appender name="myDailyRollingFile" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="File" value="/logs/member/login.log"/>
+		<param name="Append" value="true"/>
+		<param name="encoding" value="UTF-8"/>
+		<param name="DatePattern" value="'.'yyyyMMdd"/>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d{yy-MM-dd HH:mm:ss} [%p] %c{1}.%M{%L} - %m%n" />
+		</layout>
+	</appender>
+	<!-- Application Loggers -->
+	<!-- 발생한 로그들을 받아주는 역할 -->
+	<!-- 
+		주의 - name속성값에 오타가 있어도 에러가 발생하지 않음.
+		
+		DEBUG < INFO < WARN < ERROR < FATAL
+			설정한 level 이상만  출력이 가능 - 레벨을 info로 설정 시 디버그 제외 모두 출력가능
+			
+			fatal - 아주 심각한에러
+			error - 어떤 요철 처리 중 문제발생
+			warn - 에러가 날수있음을 알려줌 - 프로그램실행헤는 문제 x
+			info - 정보성메시지
+			debug - 디버깅시필요한데이터
+			trace = 디버그 레벨이 너무 광범위 한것을 해결하기 위해 조금 더 상세한 이벤트를 나타내기 위해 사용 - 경로추적
+	 -->
+	<logger name="com.kh.spring">
+		<level value="info" />
+	</logger>
+	
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework.core">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.springframework.beans">
+		<level value="info" />
+	</logger>
+	
+	<logger name="org.springframework.context">
+		<level value="info" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="info" />
+	</logger>
+
+	<logger name="com.kh.spring.log.Log4jTest" additivity="false">
+		<level value="debug"/>
+		<appender-ref ref="console"/>
+	</logger>
+	
+	<logger name="com.kh.spring.member.controller.MemberController" additivity="false">
+		<level value="debug"/>
+		<!-- <appender-ref ref="myConsole"/> -->
+		<appender-ref ref="myDailyRollingFile"/>
+	</logger>
+
+	<logger name="com.kh.spring.common.interceptor.TestInterceptor" additivity="false">
+		<level value="debug"/>
+		<appender-ref ref="myConsole"/>
+	</logger>
+
+	<!--  Root Logger-->
+	<!--  -->
+	<!-- Root Logger -->
+	<root>
+		<priority value="warn" />
+		<appender-ref ref="console" />
+	</root>
+	
+</log4j:configuration>

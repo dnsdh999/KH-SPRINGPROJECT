@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="memberMapper">
+	<select id="memberLogin" resultMap="memberResultSet"><!-- 파라미터 타입은 적어도되고 안적어도 된다. -->
+		select * 
+		from member 
+		where ID = #{id}
+			and MEMBER_STATUS = 'Y'
+	</select>
+	<!-- 
+		id : 외부(DAO)에서 참조하기 위한 쿼리문의 고유 아이디 (구분자)
+		마이바티스에서 알아서 형변환 해주기때문에 예전처럼 rset에 받아와서 일일히 넣어줄 필요가 없다.
+		parameterType : 구문에 전달될 파라미터의 패키지 경로를 포함한 전체 클래스 명 혹은 별칭
+		resultType : 쿼리 실행 후 조회된 결과를 자바에서 사용할 수 있게 하는 객체
+	 -->
+	 
+	 	
+	 <!-- DB의 컬럼과 클래스의 필드를 매핑시켜줄 때 사용 -->
+	 <resultMap type="Member" id="memberResultSet">
+	 	<id column="ID" property="id"/> <!-- 기본키 -->
+	 	<result column="PWD" property="pwd"/> <!-- 일반컬럼 -->
+	 	<result column="NAME" property="name"/>
+	 	<result column="NICKNAME" property="nickName"/>
+	 	<result column="EMAIL" property="email"/>
+	 	<result column="GENDER" property="gender"/>
+	 	<result column="AGE" property="age"/>
+	 	<result column="PHONE" property="phone"/>
+	 	<result column="ADDRESS" property="address"/>
+	 	<result column="ENROLL_DATE" property="enrollDate"/>
+	 	<result column="UPDATE_DATE" property="updateDate"/>
+	 	<result column="MEMBER_STATUS" property="memberStatus"/>
+	 	<!-- 일치하지 않는 경우만 써도 되지만 간혹 아예되지 않을때도 있으니 모두 명시하는 것을 추천 -->
+	 </resultMap>
+	 
+	 <insert id="insertMember">
+	 	insert into member
+	 	values(#{id},#{pwd},#{name},#{nickName},#{email},#{gender},#{age},#{phone},#{address},SYSDATE,SYSDATE,default)
+	 </insert>
+	 
+	 <update id="updateMember">
+	 	UPDATE MEMBER SET NAME = #{name}, NICKNAME = #{nickName}, GENDER = #{gender}, AGE = #{age}, EMAIL = #{email}, PHONE = #{phone}, ADDRESS = #{address}, UPDATE_DATE = SYSDATE where ID = #{id}
+	 </update>
+	 
+	 <update id="mPwdUpdate">
+	 	UPDATE MEMBER SET PWD = #{pwd} WHERE ID = #{id}
+	 </update>
+	 
+	 <update id="updatePassword">
+	 	UPDATE MEMBER SET PWD = #{newPwd} WHERE ID = #{id}
+	 </update>
+	 
+	 <update id="mDelete">
+	 	update member set MEMBER_STATUS = 'N' where id = #{id}
+	 </update>
+	 
+	 <select id="duplicateId" resultType="_int">
+	 	select count(*) from member where id = #{id}
+	 </select>
+	 
+	 <delete id="deleteMember">
+	 	delete * from kh_member where id = #{id}
+	 </delete>
+	 
+	
+</mapper>
